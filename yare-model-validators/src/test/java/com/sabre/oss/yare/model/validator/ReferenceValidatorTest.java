@@ -609,16 +609,16 @@ class ReferenceValidatorTest {
     void shouldFailOnDuplicatedNames() {
         // given
         Rule rule = new Rule(new LinkedHashSet<>(
-                        Arrays.asList(
-                                new Attribute("duplicatedName1", null, null),
-                                new Attribute("duplicatedName2", null, null))),
-                        Arrays.asList(
-                                new Fact("duplicatedName1", null),
-                                new Fact("duplicatedName2", null)
-                        ),
-                        valueOf(null, Boolean.class, true),
-                        Collections.emptyList()
-                );
+                Arrays.asList(
+                        new Attribute("duplicatedName1", null, null),
+                        new Attribute("duplicatedName2", null, null))),
+                Arrays.asList(
+                        new Fact("duplicatedName1", null),
+                        new Fact("duplicatedName2", null)
+                ),
+                valueOf(null, Boolean.class, true),
+                Collections.emptyList()
+        );
 
         // when
         ValidationResults results = validator.validate(rule);
@@ -672,11 +672,15 @@ class ReferenceValidatorTest {
         );
     }
 
-    @Test
-    void shouldFailWhenReservedCtxNameIsUsed() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "ctx",
+            "engineController"
+    })
+    void shouldFailWhenReservedNameIsUsed(String reservedName) {
         // given
         Rule rule = new Rule(Collections.emptySet(),
-                Collections.singletonList(new Fact("ctx", null)),
+                Collections.singletonList(new Fact(reservedName, null)),
                 valueOf(null, Boolean.class, true),
                 Collections.emptyList());
 
@@ -685,24 +689,7 @@ class ReferenceValidatorTest {
 
         // then
         assertThat(results.getResults()).containsExactly(
-                ValidationResult.error("rule.ref.reserved-names", "Naming Error: Reserved names are used -> [ctx]")
-        );
-    }
-
-    @Test
-    void shouldFailWhenReservedEngineControllerNameIsUsed() {
-        // given
-        Rule rule = new Rule(Collections.emptySet(),
-                Collections.singletonList(new Fact("engineController", null)),
-                valueOf(null, Boolean.class, true),
-                Collections.emptyList());
-
-        // when
-        ValidationResults results = validator.validate(rule);
-
-        // then
-        assertThat(results.getResults()).containsExactly(
-                ValidationResult.error("rule.ref.reserved-names", "Naming Error: Reserved names are used -> [engineController]")
+                ValidationResult.error("rule.ref.reserved-names", String.format("Naming Error: Reserved names are used -> [%s]", reservedName))
         );
     }
 
