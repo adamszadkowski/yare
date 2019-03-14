@@ -24,7 +24,6 @@
 
 package com.sabre.oss.yare.model.validator;
 
-import com.google.common.collect.Streams;
 import com.sabre.oss.yare.core.EngineController;
 import com.sabre.oss.yare.core.model.Attribute;
 import com.sabre.oss.yare.core.model.Expression;
@@ -83,25 +82,8 @@ public class ReferenceValidator extends BaseValidator {
         checkReservedNamesAreNotUsed(names, results);
     }
 
-    private void checkReferencesInPredicate(Rule rule, ValidationResults results, Map<String, Type> localReferences) {
-        Expression predicate = rule.getPredicate();
-        if (predicate != null) {
-            checkExpression(predicate, results, localReferences);
-        } else {
-            append(results, RESULTS_FACTORY.undefinedPredicate());
-        }
-    }
-
-    private void checkReferencesInActions(Rule rule, ValidationResults results, Map<String, Type> localReferences) {
-        if (rule.getActions() != null) {
-            for (Expression.Action action : rule.getActions()) {
-                checkExpression(action, results, localReferences);
-            }
-        }
-    }
-
     private List<String> resolveNames(Rule rule) {
-        return Streams.concat(
+        return Stream.concat(
                 rule.getAttributes().stream()
                         .map(Attribute::getName),
                 rule.getFacts().stream()
@@ -122,6 +104,23 @@ public class ReferenceValidator extends BaseValidator {
         Stream.of(CONTEXT, ENGINE_CONTROLLER)
                 .filter(names::contains)
                 .forEach(reservedName -> append(results, RESULTS_FACTORY.reservedNames(reservedName)));
+    }
+
+    private void checkReferencesInPredicate(Rule rule, ValidationResults results, Map<String, Type> localReferences) {
+        Expression predicate = rule.getPredicate();
+        if (predicate != null) {
+            checkExpression(predicate, results, localReferences);
+        } else {
+            append(results, RESULTS_FACTORY.undefinedPredicate());
+        }
+    }
+
+    private void checkReferencesInActions(Rule rule, ValidationResults results, Map<String, Type> localReferences) {
+        if (rule.getActions() != null) {
+            for (Expression.Action action : rule.getActions()) {
+                checkExpression(action, results, localReferences);
+            }
+        }
     }
 
     private void checkExpression(Expression expression, ValidationResults results, Map<String, Type> localReferences) {
@@ -182,6 +181,11 @@ public class ReferenceValidator extends BaseValidator {
         }
     }
 
+    private boolean isCollection(Type type) {
+        return type instanceof ParameterizedType &&
+                Collection.class.isAssignableFrom((Class<?>) ((ParameterizedType) type).getRawType());
+    }
+
     private int countCollectionMarkers(String pathPart) {
         int count = 0;
         int i = -1;
@@ -189,10 +193,5 @@ public class ReferenceValidator extends BaseValidator {
             count++;
         }
         return count;
-    }
-
-    private boolean isCollection(Type type) {
-        return type instanceof ParameterizedType &&
-                Collection.class.isAssignableFrom((Class<?>) ((ParameterizedType) type).getRawType());
     }
 }
