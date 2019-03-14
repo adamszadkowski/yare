@@ -131,7 +131,7 @@
         <jaxb.version>2.3.0</jaxb.version>
         <assertj.version>3.10.0</assertj.version>
         <jmh.version>1.20</jmh.version>
-        <junit-jupiter.version>5.3.1</junit-jupiter.version>
+        <junit-jupiter.version>5.4.0</junit-jupiter.version>
     </properties>
 
     <dependencyManagement>
@@ -242,12 +242,6 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit-jupiter.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
                 <version>${junit-jupiter.version}</version>
             </dependency>
 
@@ -393,7 +387,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.0</version>
+                    <version>2.22.1</version>
                     <configuration>
                         <excludes>
                             <exclude>${test.excludes}</exclude>
