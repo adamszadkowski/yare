@@ -32,6 +32,7 @@ import com.sabre.oss.yare.core.model.Fact;
 import com.sabre.oss.yare.core.model.Rule;
 import com.sabre.oss.yare.core.reference.ChainedTypeExtractor;
 import com.sabre.oss.yare.core.reference.PlaceholderUtils;
+import com.sabre.oss.yare.model.validator.result.ReferenceResultsFactory;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.ParameterizedType;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ReferenceValidator extends BaseValidator {
+    private static final ReferenceResultsFactory RESULTS_FACTORY = new ReferenceResultsFactory();
     private static final String CONTEXT = "ctx";
     private static final String ENGINE_CONTROLLER = "engineController";
 
@@ -86,7 +88,7 @@ public class ReferenceValidator extends BaseValidator {
         if (predicate != null) {
             checkExpression(predicate, results, localReferences);
         } else {
-            append(results, ValidationResult.error("rule.predicate.not-defined", "Predicate Error: predicate was not specified"));
+            append(results, RESULTS_FACTORY.undefinedPredicate());
         }
     }
 
@@ -112,17 +114,14 @@ public class ReferenceValidator extends BaseValidator {
                 .filter(i -> Collections.frequency(names, i) > 1)
                 .collect(Collectors.toSet());
         if (!duplicatedNames.isEmpty()) {
-            append(results, ValidationResult.error("rule.ref.duplicated-names",
-                    "Naming Error: There are duplicated names -> " + duplicatedNames));
-
+            append(results, RESULTS_FACTORY.duplicatedNames(duplicatedNames));
         }
     }
 
     private void checkReservedNamesAreNotUsed(List<String> names, ValidationResults results) {
         Stream.of(CONTEXT, ENGINE_CONTROLLER)
                 .filter(names::contains)
-                .forEach(reservedName -> append(results, ValidationResult.error("rule.ref.reserved-names",
-                    String.format("Naming Error: Reserved names are used -> [%s]", reservedName))));
+                .forEach(reservedName -> append(results, RESULTS_FACTORY.reservedNames(reservedName)));
     }
 
     private void checkExpression(Expression expression, ValidationResults results, Map<String, Type> localReferences) {
@@ -143,13 +142,13 @@ public class ReferenceValidator extends BaseValidator {
         String referenceName = hasPathPart ? reference.substring(0, dotIndex) : reference;
 
         if (StringUtils.isEmpty(referenceName)) {
-            append(results, ValidationResult.error("rule.ref.empty-reference", "Reference Error: empty reference used"));
+            append(results, RESULTS_FACTORY.emptyReference());
         } else if (!localReferences.keySet().contains(referenceName)) {
-            append(results, ValidationResult.error("rule.ref.unknown-reference", "Reference Error: unknown reference used -> " + referenceName));
+            append(results, RESULTS_FACTORY.unknownReference(referenceName));
         } else if (hasPathPart) {
             String path = reference.substring(dotIndex + 1);
             if (hasEmptyPathSegment(path)) {
-                append(results, ValidationResult.error("rule.ref.empty-field", "Reference Error: field cannot have empty segments"));
+                append(results, RESULTS_FACTORY.emptyField());
             } else {
                 checkPath(referenceName, path, results, localReferences);
             }
@@ -165,7 +164,7 @@ public class ReferenceValidator extends BaseValidator {
         try {
             checkCollectionOperator(localReferences.get(reference), reference, path, results);
         } catch (ChainedTypeExtractor.InvalidPathException e) {
-            append(results, ValidationResult.error("rule.ref.unknown-field", String.format("Reference Error: unknown field used -> %s.%s", reference, path)));
+            append(results, RESULTS_FACTORY.unknownField(reference, path));
         }
     }
 
@@ -175,13 +174,10 @@ public class ReferenceValidator extends BaseValidator {
         for (String pathPart : pathParts) {
             currentType = chainedTypeExtractor.findPathType(currentType, pathPart);
             if (!isCollection(currentType) && pathPart.contains("[*]")) {
-                append(results, ValidationResult.error("rule.ref.non-collection-field", String.format("Reference Error: field is not collection type -> %s.%s", reference, path)));
+                append(results, RESULTS_FACTORY.nonCollectionField(reference, path));
             }
             if (isCollection(currentType) && countCollectionMarkers(pathPart) > 1) {
-                append(results, ValidationResult.warning(
-                        "rule.ref.multiple-collection-markers",
-                        String.format("Reference Error: field has more than one collection marker -> %s.%s", reference, path)
-                ));
+                append(results, RESULTS_FACTORY.multipleCollectionMarkers(reference, path));
             }
         }
     }
