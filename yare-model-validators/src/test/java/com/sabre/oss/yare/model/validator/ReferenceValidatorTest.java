@@ -625,7 +625,7 @@ class ReferenceValidatorTest {
 
         // then
         assertThat(results.getResults()).containsExactly(
-                ValidationResult.error("rule.ref.duplicated-names", "Naming Error: There are duplicated names -> [duplicatedName1, duplicatedName2]")
+                ValidationResult.error("rule.ref.duplicated-names", "Reference Error: found name duplication -> [duplicatedName1, duplicatedName2]")
         );
     }
 
@@ -645,7 +645,7 @@ class ReferenceValidatorTest {
 
         // then
         assertThat(results.getResults()).containsExactly(
-                ValidationResult.error("rule.ref.duplicated-names", "Naming Error: There are duplicated names -> [duplicatedFactName]")
+                ValidationResult.error("rule.ref.duplicated-names", "Reference Error: found name duplication -> [duplicatedFactName]")
         );
     }
 
@@ -668,7 +668,7 @@ class ReferenceValidatorTest {
 
         // then
         assertThat(results.getResults()).containsExactly(
-                ValidationResult.error("rule.ref.duplicated-names", "Naming Error: There are duplicated names -> [duplicatedAttributeName]")
+                ValidationResult.error("rule.ref.duplicated-names", "Reference Error: found name duplication -> [duplicatedAttributeName]")
         );
     }
 
@@ -689,7 +689,7 @@ class ReferenceValidatorTest {
 
         // then
         assertThat(results.getResults()).containsExactly(
-                ValidationResult.error("rule.ref.reserved-names", String.format("Naming Error: Reserved names are used -> [%s]", reservedName))
+                ValidationResult.error("rule.ref.reserved-names", String.format("Reference Error: reserved names are used -> [%s]", reservedName))
         );
     }
 

@@ -31,37 +31,59 @@ import java.util.Set;
 public class ReferenceResultsFactory {
 
     public ValidationResult undefinedPredicate() {
-        return ValidationResult.error("rule.predicate.not-defined", "Predicate Error: predicate was not specified");
+        return ValidationResult.error(
+                "rule.predicate.not-defined",
+                "Predicate Error: predicate was not specified"
+        );
     }
 
     public ValidationResult duplicatedNames(Set<String> duplicatedNames) {
-        return ValidationResult.error("rule.ref.duplicated-names",
-                "Naming Error: There are duplicated names -> " + duplicatedNames);
+        return ValidationResult.error(
+                "rule.ref.duplicated-names",
+                String.format("Reference Error: found name duplication -> %s", duplicatedNames)
+        );
     }
 
     public ValidationResult reservedNames(String reservedName) {
-        return ValidationResult.error("rule.ref.reserved-names",
-                String.format("Naming Error: Reserved names are used -> [%s]", reservedName));
+        return ValidationResult.error(
+                "rule.ref.reserved-names",
+                String.format("Reference Error: reserved names are used -> [%s]", reservedName)
+        );
     }
 
     public ValidationResult emptyReference() {
-        return ValidationResult.error("rule.ref.empty-reference", "Reference Error: empty reference used");
+        return ValidationResult.error(
+                "rule.ref.empty-reference",
+                "Reference Error: empty reference used"
+        );
     }
 
     public ValidationResult unknownReference(String referenceName) {
-        return ValidationResult.error("rule.ref.unknown-reference", "Reference Error: unknown reference used -> " + referenceName);
+        return ValidationResult.error(
+                "rule.ref.unknown-reference",
+                String.format("Reference Error: unknown reference used -> %s", referenceName)
+        );
     }
 
     public ValidationResult emptyField() {
-        return ValidationResult.error("rule.ref.empty-field", "Reference Error: field cannot have empty segments");
+        return ValidationResult.error(
+                "rule.ref.empty-field",
+                "Reference Error: field cannot have empty segments"
+        );
     }
 
     public ValidationResult nonCollectionField(String reference, String path) {
-        return ValidationResult.error("rule.ref.non-collection-field", String.format("Reference Error: field is not collection type -> %s.%s", reference, path));
+        return ValidationResult.error(
+                "rule.ref.non-collection-field",
+                String.format("Reference Error: field is not collection type -> %s.%s", reference, path)
+        );
     }
 
     public ValidationResult unknownField(String reference, String path) {
-        return ValidationResult.error("rule.ref.unknown-field", String.format("Reference Error: unknown field used -> %s.%s", reference, path));
+        return ValidationResult.error(
+                "rule.ref.unknown-field",
+                String.format("Reference Error: unknown field used -> %s.%s", reference, path)
+        );
     }
 
     public ValidationResult multipleCollectionMarkers(String reference, String path) {
